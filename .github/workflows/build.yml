@@ -36,7 +36,7 @@ jobs:
       if: matrix.os == 'windows-latest'
       run: |
         Invoke-WebRequest -Uri "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip" -OutFile "ffmpeg.zip"
-        7z e ffmpeg.zip -o. ffmpeg.exe -r
+        7z e ffmpeg.zip ffmpeg.exe -r
 
     - name: Build on Windows
       if: matrix.os == 'windows-latest'
