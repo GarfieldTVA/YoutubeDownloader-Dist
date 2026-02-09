@@ -66,7 +66,10 @@ def main():
     for i in range(retries):
         try:
             if os.path.exists(target_file):
-                os.remove(target_file)
+                if os.path.isdir(target_file):
+                    shutil.rmtree(target_file)
+                else:
+                    os.remove(target_file)
             shutil.move(new_file, target_file)
             
             # Rendre exécutable sur Linux/Mac

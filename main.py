@@ -268,6 +268,16 @@ class YouTubeDownloaderApp(ctk.CTk):
                 download_target = os.path.join(self.app_data, f"update_tmp{ext}")
 
             current_exe = sys.executable
+            
+            # Gestion macOS .app
+            if sys.platform == 'darwin' and getattr(sys, 'frozen', False):
+                # Si on est dans un .app/Contents/MacOS/exe, on veut remonter au .app
+                # Structure: App.app/Contents/MacOS/executable
+                # Donc on remonte de 3 niveaux
+                possible_app = os.path.dirname(os.path.dirname(os.path.dirname(current_exe)))
+                if possible_app.endswith('.app'):
+                    current_exe = possible_app
+                    self.full_logs.append(f"[UPDATE] Mode macOS bundle détecté. Cible: {current_exe}")
 
             # Télécharger la mise à jour avec vérification basique
             try:
@@ -321,12 +331,19 @@ class YouTubeDownloaderApp(ctk.CTk):
                         with tarfile.open(download_target, 'r:gz') as tar_ref:
                             tar_ref.extractall(extract_dir)
                             
-                    # Recherche de l'exécutable dans le dossier extrait
+                    # Stratégie 1: Chercher un fichier contenant le nom actuel
                     found_exe = None
                     current_name_base = os.path.splitext(os.path.basename(sys.executable))[0]
-                    
-                    # Stratégie 1: Chercher un fichier contenant le nom actuel
+
                     for root, dirs, files in os.walk(extract_dir):
+                        # Sur macOS, on cherche aussi les dossiers .app
+                        if sys.platform == 'darwin':
+                            for d in dirs:
+                                if d.endswith(".app"):
+                                    found_exe = os.path.join(root, d)
+                                    break
+                        if found_exe: break
+
                         for file in files:
                             if current_name_base.lower() in file.lower() or "youtubedownloader" in file.lower():
                                 full_path = os.path.join(root, file)
