@@ -1,0 +1,41 @@
+=============================================================================
+   YOUTUBE DOWNLOADER ULTIMATE (2026 Edition)
+=============================================================================
+
+Merci d'utiliser ce logiciel de téléchargement optimisé.
+
+INSTRUCTIONS D'INSTALLATION ET D'UTILISATION :
+
+1. LANCEMENT
+   - Double-cliquez sur "YouTubeDownloaderUltimate.exe" (situé dans le dossier 'dist').
+   - L'interface s'ouvrira après quelques secondes.
+
+2. FFMPEG (CRITIQUE POUR LA QUALITÉ)
+   Pour télécharger en 1080p, 4K ou convertir en MP3 de haute qualité, le logiciel
+   a besoin de "FFmpeg".
+   
+   Si vous ne l'avez pas :
+   a) Téléchargez FFmpeg ici : https://ffmpeg.org/download.html (ou un build Windows : https://www.gyan.dev/ffmpeg/builds/)
+   b) Extrayez le fichier "ffmpeg.exe" de l'archive.
+   c) Placez "ffmpeg.exe" dans le MÊME dossier que "YouTubeDownloaderUltimate.exe".
+   
+   Sans FFmpeg, les téléchargements seront limités à 720p maximum et le MP3 pourrait échouer.
+
+3. UTILISATION
+   - Collez le lien de la vidéo YouTube.
+   - Choisissez "Vidéo (MP4)" ou "Audio (MP3)".
+   - Si Vidéo, choisissez la qualité (Meilleure, 1080p, etc.).
+   - Cliquez sur TÉLÉCHARGER.
+   
+4. PROBLÈMES CONNUS (FEVRIER 2026)
+   - Si le téléchargement est lent, c'est souvent YouTube qui bride la connexion.
+     Le logiciel tente de contourner cela automatiquement.
+   - Si le téléchargement échoue immédiatement, vérifiez votre connexion ou essayez
+     une autre vidéo (certaines vidéos musicales sont très protégées).
+
+5. MISE À JOUR
+   Ce logiciel utilise les dernières technologies de février 2026.
+   Si YouTube change ses systèmes dans le futur, il faudra recompiler le logiciel
+   avec les nouvelles bibliothèques.
+
+Bon téléchargement !

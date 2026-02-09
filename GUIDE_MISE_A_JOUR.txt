@@ -1,0 +1,47 @@
+# GUIDE DE MISE À JOUR (SIMPLIFIÉ)
+
+## Le Problème
+Votre ordinateur est un Windows. Il ne peut **pas** fabriquer les applications pour Mac ou Linux.
+C'est physiquement impossible pour Windows de créer un exécutable Mac.
+
+## La Solution
+Nous utilisons **GitHub** (le site où est votre code) pour fabriquer les applications à votre place.
+
+---
+
+## COMMENT FAIRE UNE MISE À JOUR (Pas à pas)
+
+### ÉTAPE 1 : Modifiez votre code
+Faites vos changements, testez sur votre PC avec `build.bat` comme d'habitude.
+Quand vous êtes prêt à publier la version 1.0.4 (par exemple) :
+1. Ouvrez `main.py` et changez `CURRENT_VERSION = "1.0.4"`
+2. Sauvegardez.
+
+### ÉTAPE 2 : Envoyez sur GitHub
+Ouvrez votre terminal et tapez ces 3 commandes :
+1. `git add .`
+2. `git commit -m "Version 1.0.4"`
+3. `git push`
+
+### ÉTAPE 3 : Déclenchez la fabrication (Le "Tag")
+C'est l'étape magique. Pour dire à GitHub "Fabrique les versions Windows, Mac et Linux maintenant", tapez :
+1. `git tag v1.0.4`
+2. `git push origin v1.0.4`
+
+### ÉTAPE 4 : Attendez 3 minutes
+Allez sur votre page GitHub, onglet **"Actions"**. Vous verrez des robots travailler.
+Quand c'est fini, allez dans l'onglet **"Releases"**.
+Vous y trouverez automatiquement :
+- `YouTubeDownloader_v1.0.4.exe` (Windows)
+- `YouTubeDownloader_v1.0.4.zip` (Mac)
+- `YouTubeDownloader_v1.0.4.tar.gz` (Linux)
+
+### ÉTAPE 5 : Mettez à jour le fichier version.json
+C'est la dernière étape pour que les utilisateurs reçoivent la notif.
+Modifiez votre fichier `version.json` avec les nouveaux liens créés par GitHub à l'étape 4, et envoyez-le.
+
+---
+
+## RÉSUMÉ
+Avant : Vous fabriquiez l'EXE sur votre PC.
+Maintenant : Vous envoyez le code à GitHub, et C'EST GITHUB qui fabrique les fichiers pour tout le monde (Windows + Mac + Linux).

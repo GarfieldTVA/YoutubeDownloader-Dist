@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.spec
+
+# C# / .NET
+bin/
+obj/
+.vs/
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build artifacts
+dist/
+build/
+*.exe
+*.zip
+*.tar.gz
+*.pkg
+*.dmg
+
+# Environment
+.env
+.venv
+env/
+venv/
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
