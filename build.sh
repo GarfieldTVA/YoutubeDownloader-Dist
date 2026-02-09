@@ -42,7 +42,8 @@ echo "Compression de l'exécutable..."
 cd dist
 if [ "$(uname)" == "Darwin" ]; then
     # macOS: zip
-    zip -r "YouTubeDownloader_v1.0.3.zip" "YouTubeDownloader_v1.0.3.app" "YouTubeDownloader_v1.0.3" 2>/dev/null || zip "YouTubeDownloader_v1.0.3.zip" "YouTubeDownloader_v1.0.3"
+    # On zip uniquement le .app car --windowed ne produit pas de binaire séparé à la racine de dist
+    zip -r "YouTubeDownloader_v1.0.3.zip" "YouTubeDownloader_v1.0.3.app"
     echo "Fichier créé: dist/YouTubeDownloader_v1.0.3.zip"
 else
     # Linux: tar.gz

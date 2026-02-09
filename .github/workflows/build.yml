@@ -44,6 +44,21 @@ jobs:
       run: |
         .\build.bat
 
+    - name: Download FFmpeg (macOS)
+      if: matrix.os == 'macos-latest'
+      run: |
+        curl -L -o ffmpeg.zip https://evermeet.cx/ffmpeg/getrelease/zip
+        unzip ffmpeg.zip
+        chmod +x ffmpeg
+
+    - name: Download FFmpeg (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        curl -L -o ffmpeg.tar.xz https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz
+        tar -xf ffmpeg.tar.xz
+        mv ffmpeg-*-amd64-static/ffmpeg .
+        chmod +x ffmpeg
+
     - name: Build on macOS/Linux
       if: matrix.os != 'windows-latest'
       run: |
