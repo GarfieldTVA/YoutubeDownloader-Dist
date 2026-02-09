@@ -19,7 +19,7 @@ import time
 ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("blue")
 
-CURRENT_VERSION = "1.0.3"
+CURRENT_VERSION = "1.0.4"
 # URL pour vérifier les mises à jour (JSON)
 # Format attendu du JSON: {"version": "25.0", "url": "https://lien/vers/nouveau.exe"}
 UPDATE_CHECK_URL = "https://raw.githubusercontent.com/GarfieldTVA/YoutubeDownloader-Dist/main/version.json" 
@@ -60,7 +60,7 @@ class YouTubeDownloaderApp(ctk.CTk):
     def __init__(self):
         super().__init__()
         
-        self.title("YouTube Downloader Ultimate - V25 (Auto-Update)")
+        self.title(f"YouTube Downloader Ultimate - v{CURRENT_VERSION}")
         self.geometry("900x750")
         
         self.full_logs = []  # Stockage des logs complets
