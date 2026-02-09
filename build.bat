@@ -26,7 +26,7 @@ echo     COMPILATION TERMINEE !
 echo ===================================================
 echo.
 echo L'executable se trouve dans le dossier 'dist'.
-echo Vous pouvez copier 'dist\YouTubeDownloader_v1.0.exe' ou vous voulez.
+echo Vous pouvez copier 'dist\YouTubeDownloader_v1.0.3.exe' ou vous voulez.
 echo.
 echo NOTE: Pour que la fusion Audio/Video fonctionne en haute qualite (1080p+),
 echo vous devez avoir 'ffmpeg.exe' dans le meme dossier que l'application
