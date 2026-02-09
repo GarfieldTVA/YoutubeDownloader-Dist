@@ -34,7 +34,7 @@ else
 fi
 
 # Note the separator is ':' for Unix in --add-data
-python3 -m PyInstaller --noconfirm --onefile --windowed --name "YouTubeDownloader_v1.0.4" --icon="NONE" $FFMPEG_ARG --add-data "dist/updater:." main.py || exit 1
+python3 -m PyInstaller --noconfirm --onefile --windowed --name "YouTubeDownloader_v1.0.4" $FFMPEG_ARG --add-data "dist/updater:." main.py || exit 1
 
 # Compression pour la distribution
 echo ""
