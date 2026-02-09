@@ -34,21 +34,31 @@ else
 fi
 
 # Note the separator is ':' for Unix in --add-data
-python3 -m PyInstaller --noconfirm --onefile --windowed --name "YouTubeDownloader_v1.0.3" --icon="NONE" $FFMPEG_ARG --add-data "dist/updater:." main.py
+python3 -m PyInstaller --noconfirm --onefile --windowed --name "YouTubeDownloader_v1.0.4" --icon="NONE" $FFMPEG_ARG --add-data "dist/updater:." main.py || exit 1
 
 # Compression pour la distribution
 echo ""
 echo "Compression de l'exécutable..."
-cd dist
+cd dist || exit 1
 if [ "$(uname)" == "Darwin" ]; then
     # macOS: zip
     # On zip uniquement le .app car --windowed ne produit pas de binaire séparé à la racine de dist
-    zip -r "YouTubeDownloader_v1.0.3.zip" "YouTubeDownloader_v1.0.3.app"
-    echo "Fichier créé: dist/YouTubeDownloader_v1.0.3.zip"
+    if [ -d "YouTubeDownloader_v1.0.4.app" ]; then
+        zip -r "YouTubeDownloader_v1.0.4.zip" "YouTubeDownloader_v1.0.4.app"
+        echo "Fichier créé: dist/YouTubeDownloader_v1.0.4.zip"
+    else
+        echo "ERREUR: YouTubeDownloader_v1.0.4.app non trouvé !"
+        exit 1
+    fi
 else
     # Linux: tar.gz
-    tar -czvf "YouTubeDownloader_v1.0.3.tar.gz" "YouTubeDownloader_v1.0.3"
-    echo "Fichier créé: dist/YouTubeDownloader_v1.0.3.tar.gz"
+    if [ -f "YouTubeDownloader_v1.0.4" ]; then
+        tar -czvf "YouTubeDownloader_v1.0.4.tar.gz" "YouTubeDownloader_v1.0.4"
+        echo "Fichier créé: dist/YouTubeDownloader_v1.0.4.tar.gz"
+    else
+         echo "ERREUR: Binaire YouTubeDownloader_v1.0.4 non trouvé !"
+         exit 1
+    fi
 fi
 cd ..
 
