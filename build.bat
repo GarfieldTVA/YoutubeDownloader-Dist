@@ -13,12 +13,14 @@ del /q *.spec
 echo.
 echo Lancement de PyInstaller pour UPDATER...
 python -m PyInstaller --noconfirm --onefile --console --name "updater" updater.py
+if %errorlevel% neq 0 exit /b %errorlevel%
 
 echo.
 echo Lancement de PyInstaller pour MAIN APP...
 echo Cela peut prendre quelques minutes...
 echo.
 python -m PyInstaller --noconfirm --onefile --windowed --name "YouTubeDownloader_v1.0.3" --icon="NONE" --add-data "ffmpeg.exe;." --add-data "dist/updater.exe;." main.py
+if %errorlevel% neq 0 exit /b %errorlevel%
 
 echo.
 echo ===================================================
