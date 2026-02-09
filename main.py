@@ -19,7 +19,7 @@ import time
 ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("blue")
 
-CURRENT_VERSION = "1.0.5"
+CURRENT_VERSION = "1.0.6"
 # URL pour vérifier les mises à jour (JSON)
 # Format attendu du JSON: {"version": "25.0", "url": "https://lien/vers/nouveau.exe"}
 UPDATE_CHECK_URL = "https://raw.githubusercontent.com/GarfieldTVA/YoutubeDownloader-Dist/main/version.json" 
