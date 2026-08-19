@@ -26,3 +26,7 @@ La v1.1.0 sépare volontairement l'interface graphique de la logique métier.
 8. **Extraction d'archives protégée** : validation des chemins avant extraction d'une mise à jour.
 9. **Versions comparées numériquement** : `1.10` est correctement supérieur à `1.9`.
 10. **Commentaires utiles** : les commentaires expliquent les raisons et contraintes, pas la syntaxe évidente.
+
+## Validation
+
+Le projet est vérifié avec Python 3.11 avant le build Windows, puis compilé avec PyInstaller dans une CI isolée de la branche principale.
