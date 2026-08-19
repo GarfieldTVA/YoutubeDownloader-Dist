@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any
 
 import yt_dlp
+from yt_dlp.version import __version__ as YT_DLP_VERSION
 
 from .logs import LogBuffer, YtDlpLogger
 from .models import DownloadKind, DownloadRequest, SearchResult, VideoQuality
@@ -93,9 +94,10 @@ class DownloadOptionsFactory:
     ) -> dict[str, Any]:
         """Options volontairement simples utilisées après un échec réseau/format.
 
-        Le mode de secours ne fige pas un vieux client YouTube. On laisse yt-dlp
-        choisir ses clients actuels et on exclut explicitement `android_vr`, qui
-        a été la cause du 403 rencontré en août 2026.
+        Le mode de secours ne fige aucun client YouTube. Les clients internes
+        changent régulièrement côté YouTube ; les forcer ici transformerait un
+        correctif ponctuel en nouvelle panne au changement suivant. On laisse
+        donc la version courante de yt-dlp appliquer sa propre stratégie.
         """
 
         options: dict[str, Any] = {
@@ -111,9 +113,6 @@ class DownloadOptionsFactory:
             "noplaylist": not request.playlist,
             "remote_components": {"ejs:github"},
             "js_runtimes": {"deno": {}},
-            "extractor_args": {
-                "youtube": {"player_client": ["default", "-android_vr"]},
-            },
         }
 
         self._apply_cookies(options, request.cookies_browser)
@@ -200,6 +199,7 @@ class YouTubeService:
         """
 
         self._logs.clear()
+        self._logs.append(f"[INFO] Moteur yt-dlp : {YT_DLP_VERSION}")
         logger = YtDlpLogger(status_callback, self._logs)
         factory = DownloadOptionsFactory(self._ffmpeg_path, logger)
 
