@@ -1,37 +1,40 @@
 @echo off
+setlocal
+
 echo ===================================================
-echo     COMPILATION DU DOWNLOADER YOUTUBE (HARD)
+echo   BUILD YouTube Downloader Ultimate v1.1.0
 echo ===================================================
-echo.
-echo Installation des dependances...
-pip install -r requirements.txt
-echo.
-echo Nettoyage des anciens builds...
+
+echo [1/4] Installation / mise a jour des dependances...
+python -m pip install --upgrade pip
+python -m pip install --upgrade --pre -r requirements.txt
+if %errorlevel% neq 0 exit /b %errorlevel%
+
+echo [2/4] Nettoyage...
 if exist build rmdir /s /q build
 if exist dist rmdir /s /q dist
-del /q *.spec
-echo.
-echo Lancement de PyInstaller pour UPDATER...
-python -m PyInstaller --noconfirm --onefile --console --name "updater" updater.py
+for %%F in (*.spec) do del /q "%%F"
+
+echo [3/4] Compilation de l'updater...
+python -m PyInstaller --noconfirm --clean --onefile --console --name "updater" updater.py
+if %errorlevel% neq 0 exit /b %errorlevel%
+
+echo [4/4] Compilation de l'application...
+set EXTRA_BIN=
+if exist ffmpeg.exe set EXTRA_BIN=%EXTRA_BIN% --add-binary "ffmpeg.exe;."
+if exist ffplay.exe set EXTRA_BIN=%EXTRA_BIN% --add-binary "ffplay.exe;."
+
+python -m PyInstaller ^
+  --noconfirm ^
+  --clean ^
+  --onefile ^
+  --windowed ^
+  --name "YouTubeDownloader_v1.1.0" ^
+  --add-binary "dist/updater.exe;." ^
+  %EXTRA_BIN% ^
+  main.py
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 echo.
-echo Lancement de PyInstaller pour MAIN APP...
-echo Cela peut prendre quelques minutes...
-echo.
-python -m PyInstaller --noconfirm --onefile --windowed --name "YouTubeDownloader_v1.0.4" --icon="NONE" --add-data "ffmpeg.exe;." --add-data "dist/updater.exe;." main.py
-if %errorlevel% neq 0 exit /b %errorlevel%
-
-echo.
-echo ===================================================
-echo     COMPILATION TERMINEE !
-echo ===================================================
-echo.
-echo L'executable se trouve dans le dossier 'dist'.
-echo Vous pouvez copier 'dist\YouTubeDownloader_v1.0.4.exe' ou vous voulez.
-echo.
-echo NOTE: Pour que la fusion Audio/Video fonctionne en haute qualite (1080p+),
-echo vous devez avoir 'ffmpeg.exe' dans le meme dossier que l'application
-echo ou installe dans votre systeme.
-echo.
-echo.
+echo Build termine : dist\YouTubeDownloader_v1.1.0.exe
+endlocal
