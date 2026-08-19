@@ -1,71 +1,22 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-echo "==================================================="
-echo "    COMPILATION DU DOWNLOADER YOUTUBE (UNIX)"
-echo "==================================================="
-echo ""
+python -m pip install --upgrade pip
+python -m pip install --upgrade --pre -r requirements.txt
+rm -rf build dist ./*.spec
 
-# Installation des dépendances
-echo "Installation des dépendances..."
-pip3 install -r requirements.txt
+python -m PyInstaller --noconfirm --clean --onefile --console --name updater updater.py
 
-echo ""
-echo "Nettoyage des anciens builds..."
-rm -rf build dist
-rm -f *.spec
+extra=()
+[[ -f ffmpeg ]] && extra+=(--add-binary "ffmpeg:.")
+[[ -f ffplay ]] && extra+=(--add-binary "ffplay:.")
 
-echo ""
-echo "Lancement de PyInstaller pour UPDATER..."
-# On Linux/Mac, updater usually doesn't need an extension
-python3 -m PyInstaller --noconfirm --onefile --console --name "updater" updater.py
-
-echo ""
-echo "Lancement de PyInstaller pour MAIN APP..."
-echo "Cela peut prendre quelques minutes..."
-echo ""
-
-# Check for ffmpeg binary
-FFMPEG_ARG=""
-if [ -f "ffmpeg" ]; then
-    echo "FFmpeg trouvé, inclusion dans le paquet..."
-    FFMPEG_ARG="--add-data ffmpeg:."
-else
-    echo "AVERTISSEMENT: ffmpeg non trouvé à la racine. L'application devra le télécharger."
-fi
-
-# Note the separator is ':' for Unix in --add-data
-python3 -m PyInstaller --noconfirm --onefile --windowed --name "YouTubeDownloader_v1.0.4" $FFMPEG_ARG --add-data "dist/updater:." main.py || exit 1
-
-# Compression pour la distribution
-echo ""
-echo "Compression de l'exécutable..."
-cd dist || exit 1
-if [ "$(uname)" == "Darwin" ]; then
-    # macOS: zip
-    # On zip uniquement le .app car --windowed ne produit pas de binaire séparé à la racine de dist
-    if [ -d "YouTubeDownloader_v1.0.4.app" ]; then
-        zip -r "YouTubeDownloader_v1.0.4.zip" "YouTubeDownloader_v1.0.4.app"
-        echo "Fichier créé: dist/YouTubeDownloader_v1.0.4.zip"
-    else
-        echo "ERREUR: YouTubeDownloader_v1.0.4.app non trouvé !"
-        exit 1
-    fi
-else
-    # Linux: tar.gz
-    if [ -f "YouTubeDownloader_v1.0.4" ]; then
-        tar -czvf "YouTubeDownloader_v1.0.4.tar.gz" "YouTubeDownloader_v1.0.4"
-        echo "Fichier créé: dist/YouTubeDownloader_v1.0.4.tar.gz"
-    else
-         echo "ERREUR: Binaire YouTubeDownloader_v1.0.4 non trouvé !"
-         exit 1
-    fi
-fi
-cd ..
-
-echo ""
-echo "==================================================="
-echo "    COMPILATION TERMINEE !"
-echo "==================================================="
-echo ""
-echo "L'exécutable se trouve dans le dossier 'dist'."
-echo ""
+python -m PyInstaller \
+  --noconfirm \
+  --clean \
+  --onefile \
+  --windowed \
+  --name "YouTubeDownloader_v1.1.0" \
+  --add-binary "dist/updater:." \
+  "${extra[@]}" \
+  main.py

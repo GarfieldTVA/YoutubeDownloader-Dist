@@ -1,4 +1,4 @@
-customtkinter
-yt-dlp
-Pillow
-pyinstaller
+customtkinter>=5.2,<6
+Pillow>=10,<13
+yt-dlp[default,curl-cffi] @ https://github.com/yt-dlp/yt-dlp/archive/master.tar.gz
+pyinstaller>=6.19,<7

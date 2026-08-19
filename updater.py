@@ -1,108 +1,125 @@
+"""Petit processus chargé de remplacer l'application après sa fermeture."""
+
+from __future__ import annotations
+
+import logging
 import os
-import sys
-import time
+from pathlib import Path
 import shutil
+import signal
 import subprocess
+import sys
 import tempfile
+import time
 
-def log(msg):
-    """Log simple pour debug si besoin"""
+
+LOG_PATH = Path(tempfile.gettempdir()) / "youtube_downloader_updater.log"
+MAX_WAIT_SECONDS = 15
+REPLACE_ATTEMPTS = 8
+
+
+def configure_logging() -> None:
+    logging.basicConfig(
+        filename=LOG_PATH,
+        level=logging.INFO,
+        format="%(asctime)s | %(levelname)s | %(message)s",
+        encoding="utf-8",
+    )
+
+
+def process_exists(pid: int) -> bool:
     try:
-        log_file = os.path.join(tempfile.gettempdir(), "updater_log.txt")
-        with open(log_file, "a") as f:
-            f.write(f"{msg}\n")
-    except:
-        pass
+        os.kill(pid, 0)
+        return True
+    except OSError:
+        return False
 
-def main():
-    # Arguments attendus:
-    # 1: PID du processus principal (à attendre)
-    # 2: Chemin du nouveau fichier (téléchargé)
-    # 3: Chemin de l'exécutable cible (l'app principale à remplacer)
-    
-    if len(sys.argv) < 4:
-        log("Erreur: Arguments manquants")
-        sys.exit(1)
 
-    pid = int(sys.argv[1])
-    new_file = sys.argv[2]
-    target_file = sys.argv[3]
+def wait_for_process(pid: int) -> None:
+    deadline = time.monotonic() + MAX_WAIT_SECONDS
+    while process_exists(pid) and time.monotonic() < deadline:
+        time.sleep(0.25)
 
-    log(f"Démarrage updater. PID={pid}, New={new_file}, Target={target_file}")
-
-    # 1. Attendre la fermeture de l'application principale
-    log("Attente fermeture processus...")
-    max_wait = 10 # secondes
-    start_time = time.time()
-    
-    while True:
+    if process_exists(pid):
+        logging.warning("Le processus %s ne s'est pas fermé à temps ; SIGTERM envoyé.", pid)
         try:
-            # os.kill(pid, 0) vérifie si le processus existe (Unix et Windows)
-            os.kill(pid, 0)
-            # Si pas d'exception, le processus existe encore
-            time.sleep(0.5)
-            if time.time() - start_time > max_wait:
-                log("Timeout attente fermeture.")
-                # Tentative de forçage kill
-                try:
-                    import signal
-                    os.kill(pid, signal.SIGTERM)
-                except:
-                    pass
-                break
+            os.kill(pid, signal.SIGTERM)
         except OSError:
-            # Processus n'existe plus
-            log("Processus fermé.")
-            break
+            pass
+        time.sleep(1)
 
-    # Petite pause de sécurité pour libérer les verrous fichiers
-    time.sleep(2)
 
-    # 2. Remplacer le fichier
-    log("Remplacement du fichier...")
-    retries = 5
-    success = False
-    
-    for i in range(retries):
+def replace_application(source: Path, target: Path) -> None:
+    """Remplace la cible en conservant un backup jusqu'au succès.
+
+    Le backup permet de restaurer l'ancienne version si le déplacement de la
+    nouvelle application échoue au mauvais moment.
+    """
+
+    backup = target.with_name(target.name + ".bak")
+    if backup.exists():
+        shutil.rmtree(backup) if backup.is_dir() else backup.unlink()
+
+    last_error: Exception | None = None
+    for attempt in range(1, REPLACE_ATTEMPTS + 1):
         try:
-            if os.path.exists(target_file):
-                if os.path.isdir(target_file):
-                    shutil.rmtree(target_file)
-                else:
-                    os.remove(target_file)
-            shutil.move(new_file, target_file)
-            
-            # Rendre exécutable sur Linux/Mac
-            if os.name != 'nt':
+            if target.exists():
+                shutil.move(str(target), str(backup))
+
+            shutil.move(str(source), str(target))
+
+            if os.name != "nt" and target.is_file():
+                target.chmod(target.stat().st_mode | 0o111)
+
+            if backup.exists():
+                shutil.rmtree(backup) if backup.is_dir() else backup.unlink()
+            logging.info("Remplacement réussi à la tentative %s.", attempt)
+            return
+        except Exception as error:  # Le détail est journalisé pour le diagnostic.
+            last_error = error
+            logging.exception("Échec du remplacement (%s/%s).", attempt, REPLACE_ATTEMPTS)
+
+            # Si la nouvelle cible n'existe pas mais que le backup oui, on restaure.
+            if not target.exists() and backup.exists():
                 try:
-                    import stat
-                    st = os.stat(target_file)
-                    os.chmod(target_file, st.st_mode | stat.S_IEXEC)
-                except Exception as e:
-                    log(f"Erreur chmod: {e}")
+                    shutil.move(str(backup), str(target))
+                except Exception:
+                    logging.exception("Impossible de restaurer le backup.")
 
-            success = True
-            log("Remplacement réussi.")
-            break
-        except Exception as e:
-            log(f"Erreur remplacement ({i+1}/{retries}): {e}")
-            time.sleep(1)
+            time.sleep(0.75)
 
-    if not success:
-        log("Echec critique du remplacement.")
-        sys.exit(1)
+    raise RuntimeError("Impossible de remplacer l'application.") from last_error
 
-    # 3. Relancer l'application
-    log("Redémarrage application...")
+
+def relaunch(target: Path) -> None:
+    kwargs: dict[str, object] = {}
+    if os.name != "nt":
+        kwargs["start_new_session"] = True
+    subprocess.Popen([str(target)], **kwargs)
+
+
+def main() -> int:
+    configure_logging()
+
+    if len(sys.argv) != 4:
+        logging.error("Arguments invalides : %r", sys.argv)
+        return 2
+
     try:
-        if os.name == 'nt':
-            subprocess.Popen([target_file])
-        else:
-            # Sur Linux/Mac, utiliser nohup ou double-fork idéalement, mais Popen suffit souvent
-            subprocess.Popen([target_file], start_new_session=True)
-            
-    except Exception as e:
-        log(f"Erreur redémarrage: {e}")
+        pid = int(sys.argv[1])
+        source = Path(sys.argv[2]).resolve()
+        target = Path(sys.argv[3]).resolve()
+
+        logging.info("Update demandé : pid=%s source=%s target=%s", pid, source, target)
+        wait_for_process(pid)
+        time.sleep(0.75)  # Laisse Windows libérer les derniers handles de fichier.
+        replace_application(source, target)
+        relaunch(target)
+        return 0
+    except Exception:
+        logging.exception("Échec critique de la mise à jour.")
+        return 1
+
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
